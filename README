@@ -1,0 +1,34 @@
+THE SOURCE CODE CONTAINED IN THIS REPOSITORY IS THE SOLE PROPERTY OF INKTEL DIRECT.
+YOU ARE THEREBY PROHIBITED FROM COPYING, DISTRIBUTING, MODIFYING, OR DOWNLOADING OF THIS SOURCE CODE
+UNLESS YOU HAVE BEEN GIVEN EXPRESS WRITTEN PERMISSION FROM A DIRECTOR OF INKTEL DIRECT CORPORATION.
+
+Welcome to X's GitHub repository
+
+X is a revolutionary cloud-based communications platform sponsored by Inktel's Application Services team. 
+
+The primary goal of this platform is to deliver a relevant and current framework for delivering various communications technologies for contact centers. 
+As it evolves, part of its road map will include expansion into consumer-facing services.
+
+Key factors for our choice of a technology stack includes:
+a. Platform must be highly reliable and empowered by an Open Source technology stack.
+b. Platform must support horizontal and vertical scaling with very minimal effort.
+c. Platform must not be bound to proprietary licensing costs.
+
+As a result of the aforementioned goals, the technology stack is as follows:
+a. Platform will be designed using the Mono Framework
+b. Platform will be deployed on the Linux operating system (CentOS or Ubuntu distributions)
+c. Platform will be served using the popular Apache Web Server
+d. Platform data repository will reside within MySQL databases
+
+Technology
+----------
+It's designed using the following technology stack:
+PHP 5.3+
+Apache
+Linux
+MySQL
+
+PHP-ActiveRecord is used for the data access layer and model creation, and the entire service runs on the Zend Framework, following the MVC pattern.
+
+
+Copyright (c) 2011. All rights reserved.
