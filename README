@@ -28,7 +28,8 @@ Apache
 Linux
 MySQL
 
-PHP-ActiveRecord is used for the data access layer and model creation, and the entire service runs on the Zend Framework, following the MVC pattern.
+PHP-ActiveRecord is used for the data access layer and model creation, and the entire service runs on the Zend Framework, following the MVC pattern. 
+We are considering replacing the ActiveRecord pattern with Doctrine sometime in the future.
 
 
 Copyright (c) 2011. All rights reserved.
