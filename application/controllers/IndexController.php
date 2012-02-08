@@ -11,7 +11,11 @@ class IndexController extends Zend_Controller_Action
     public function indexAction()
     {
         // action body
+<<<<<<< HEAD
         
+=======
+        echo "Welcome!!";
+>>>>>>> 64ed09015ca771e5267cbce4293adcd3503ade62
     }
 
 
