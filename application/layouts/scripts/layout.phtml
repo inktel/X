@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <link href="<?=$this->baseUrl('/css/Base.css')?>" rel="stylesheet" type="text/css" />
+    <link href="<?=$this->baseUrl('/css/Controls.css')?>" rel="stylesheet" type="text/css" />
+    
+    <?php echo $this->jQuery();?>
+    <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            // get the proper action or controller requested in order to activate the right nav item
+
+            var actions = location.pathname.split("/");
+            var action = actions[actions.length - 1];
+            if (!action) action = 'home';
+            action = action.toLowerCase();
+            // Check our nav request and change selected menu accordingly
+
+            $('li.menuItem').removeClass('act').addClass('inact');
+            $('#' + action).removeClass('inact').addClass('act');
+
+        });
+    </script>     
+  </head>
+  <body>
+     <div id="page">
+        <header>
+            <nav>
+                <div id="menu">
+                    <ul>
+                        <li class="menuItem" id="home"><a href="<?=$this->baseUrl('/')?>" title="Home"><img src="<?=$this->baseUrl('/images/navigation/thumb-home.png')?>" alt="Home" /></a></li>
+                        <li class="menuItem" id="livemonitor"><a href="<?=$this->baseUrl('/LiveMonitor')?>" title="Live Monitoring"><img src="<?=$this->baseUrl('/images/navigation/thumb-live-monitor.png')?>" alt="Live Monitoring" /></a></li>
+                        <li class="menuItem" id="realtime"><a href="<?=$this->baseUrl('/RealTime')?>" title="Real Time Activity"><img src="<?=$this->baseUrl('/images/navigation/thumb-reports.png')?>" alt="Real Time Activity" /></a></li>
+                        <li class="menuItem" id="did"><a href="<?=$this->baseUrl('/did')?>" title="DID Manager"><img src="<?=$this->baseUrl('/images/navigation/thumb-did-manager.png')?>" alt="DID Manager" /></a></li>
+                        
+                        <li class="emptyleft"></li>
+                    </ul>
+                    <div class="logo">
+                        <img src="<?=$this->baseUrl('/images/inktelx.gif')?>" />
+                    </div>
+                </div>
+                <div style="float:right;margin-bottom:-30px; margin-right: 20px; margin-top:10px;">
+                   
+                </div>
+            </nav>
+        </header>
+
+        <div id="content">
+            <div><?php echo $this->layout()->content; ?></div>
+        </div>
+        <footer></footer>
+    </div> 
+    
+  </body>
+</html>
+

@@ -1,0 +1,179 @@
+<script>
+    $(document).ready( function(){
+        var  highlightColor = "#CCDDCC";
+        var $selectedColNumber = $("#number").val().replace(/[^A-Za-z0-9]/g,"").replace(" ","");
+        var $selectedColDescription = $("#description").val().replace(/[^A-Za-z0-9]/g,"").replace(" ","");
+        $("#" + $selectedColNumber).css('background-color',highlightColor);
+        $("#" + $selectedColDescription).css('background-color',highlightColor);
+        var $prevSelectedColNumber = $selectedColNumber;
+        var $prevSelectedColDescription = $selectedColDescription;
+
+        $("#number").change(function(e){
+             $("#" + $prevSelectedColNumber).css('background-color','');
+             $selectedColNumber = $("#number").val().replace(/[^A-Za-z0-9]/g,"").replace(" ","");
+             $("#" + $selectedColNumber).css('background-color',highlightColor);
+             $prevSelectedColNumber = $selectedColNumber;
+        });
+        
+        $("#description").change(function(e){
+            $("#" + $prevSelectedColDescription).css('background-color','');
+            $selectedColDescription = $("#description").val().replace(/[^A-Za-z0-9]/g,"").replace(" ","");
+            $("#" + $selectedColDescription).css('background-color',highlightColor);
+            $prevSelectedColDescription = $selectedColDescription;
+        });
+        
+    });
+
+</script>
+<style type="text/css">
+    select{
+        width: 240px;
+        height: 25px;
+        overflow: hidden;
+/*        background: url(../images/down_arrow_select.jpg) no-repeat right;*/
+        font-family: arial;
+        font-size: 10pt;
+    }
+    select option{
+        font-family: arial;
+        font-size: 10pt;
+    }
+    
+    #view-filters{
+        margin-left: 5px;
+    }
+   .fileCols{ 
+ 
+        margin-bottom: 10px;
+        margin-left: 5px;
+        display: inline-block;
+        border-right: dashed 1px black;
+        padding-right: 5px;
+
+    }
+    #file-content{
+        margin: auto;
+        margin-top: 60px;
+        width:90%;
+        overflow-x:scroll;   
+        white-space: nowrap;
+    }
+    ul{
+        margin: 0;
+        padding: 0;
+        list-style-type: none;
+        text-align: left;
+         
+    }
+    
+    
+    ul li:first-child
+    {
+         border-bottom: solid 1px black;
+         color: black;
+        
+    }
+    #view-content{
+        margin-top: 30px;
+        margin-left: 30px;
+    }
+    #button-area{
+        margin-left: 750px;
+        margin-top: 20px;
+    }
+    p{
+       text-align: left;
+    }
+</style>
+<form method="post" enctype="multipart/form-data" action="manage"> 
+    <div id="view-content">
+
+        <table >
+            <thead>
+                <tr>
+                    <td colspan="2" align="left">Select Number and Description columns</td>
+                </tr>
+                <tr>
+                    <td colspan="2" align="left">&nbsp;</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                <td align="left"><label for="number">Number</label></td>
+                <td align="left">
+                    <select id="number" name="number">
+                    <?php 
+                        foreach ($this->colsFilter as $key => $value) 
+                        {
+                            if($key == "Number")
+                            {
+                                $count = count($value);
+                                for ($i = 0; $i < $count; $i++)
+                                {
+                                    $selected = "";
+                                    if ($value[$i]["IsDefault"] == 1) $selected = "selected"; 
+                                    echo '<option value="'.$value[$i]["ColumnName"].'" '.$selected.'>'.$value[$i]["ColumnName"].'</option>';
+
+                                }
+                            }
+
+                        }
+                    ?>
+                </select>
+                </td>
+            </tr>
+            <tr>
+                <td align="left"> <label for="description">Description</label></td>
+                <td align="left">
+                    <select id="description" name="description">
+                    <?php 
+                        foreach ($this->colsFilter as $key => $value) 
+                        {
+                            if($key == "Description")
+                            {
+                                $count = count($value);
+                                for ($i = 0; $i < $count; $i++)
+                                {
+                                    $selected = "";
+                                    if ($value[$i]["IsDefault"] == 1) $selected = "selected"; 
+                                    echo '<option value="'.$value[$i]["ColumnName"].'" '.$selected.'>'.$value[$i]["ColumnName"].'</option>';
+
+                                }
+                            }
+                        }
+                    ?>
+                </select>
+                </td>
+            </tr>
+            </tbody>
+
+        </table>
+
+        </div>
+        <div id="file-content">
+            <?php 
+                foreach ($this->fileContent as $key => $value) 
+                {
+                    $count = count($value);
+                    if ($count > 10) $count =  10;
+                    echo '<div id="'.preg_replace("/[^A-Za-z0-9]/","", $key).'"'.' class="fileCols">';
+                    echo '<ul>';
+
+                    echo '<li>'.$key.'</li>';
+                    for ($i = 1; $i <= $count; $i++)
+                    {
+                        $val = $value[$i];
+                        if ($val == "") $val= "N/A";
+                        echo '<li>'.$val.'</li>';
+                    }
+                    echo '</ul>';
+                    echo '</div>';
+                }
+
+            ?>
+
+        </div>   
+        <div id="button-area">
+            <input type="submit" value="Select columns" />
+        </div>
+</form>

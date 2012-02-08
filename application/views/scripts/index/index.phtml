@@ -1,43 +1,45 @@
-<style>
-    a:link,
-    a:visited
+<?php $this->title = "Home - InktelX"; ?>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#menu ul').hide();
+    });
+</script>
+<style type="text/css">
+    #launchpad
     {
-        color: #0398CA;
+        width: 650px;
+        min-height: 300px;
+        margin: auto;
+        margin-top: 20px;
+        -webkit-border-radius: 5px;  
+        -moz-border-radius: 5px;  
+        border-radius: 5px;
+        border: 1px solid #aaa;
     }
-
-    span#zf-name
+    
+    #launchpad img
     {
-        color: #91BE3F;
-    }
-
-    div#welcome
-    {
-        color: #FFFFFF;
-        background-image: url(http://framework.zend.com/images/bkg_header.jpg);
-        width:  600px;
-        height: 400px;
-        border: 2px solid #444444;
-        overflow: hidden;
-        text-align: center;
-    }
-
-    div#more-information
-    {
-        background-image: url(http://framework.zend.com/images/bkg_body-bottom.gif);
-        height: 100%;
+        padding: 10px;
+        margin: 20px;
+        width:72px;
+        height:72px;
+        -webkit-box-shadow: 0px 0px 5px #007eff;  
+        -moz-box-shadow: 0px 0px 5px #007eff;  
+        box-shadow: 0px 0px 5px #007eff; 
+        -webkit-border-radius: 5px;  
+        -moz-border-radius: 5px;  
+        border-radius: 5px; 
     }
 </style>
-<div id="welcome">
-    <h1>Welcome to the <span id="zf-name">Zend Framework!</span></h1>
 
-    <h3>This is your project's main page</h3>
-
-    <div id="more-information">
-        <p><img src="http://framework.zend.com/images/PoweredBy_ZF_4LightBG.png" /></p>
-        <p>
-            Helpful Links: <br />
-            <a href="http://framework.zend.com/">Zend Framework Website</a> |
-            <a href="http://framework.zend.com/manual/en/">Zend Framework Manual</a>
-        </p>
-    </div>
+<h2>Home</h2>
+<div class="instructions">
+    <p>
+        Welcome to InktelX, our next generation communications platform. Please choose an 'app' from the list below. As newers apps are released, they will be available from this list.
+    </p>
+</div>
+<div id="launchpad">
+    <a href="<?=$this->baseUrl('/LiveMonitor')?>" title="Live Monitoring"><img src="<?=$this->baseUrl('/images/navigation/thumb-live-monitor.png')?>" alt="Live Monitoring" /></a>
+    <a href="<?=$this->baseUrl('/RealTime')?>" title="Real Time Activity"><img src="<?=$this->baseUrl('/images/navigation/thumb-reports.png')?>" alt="Real Time Activity" /></a>
+    <a href="<?=$this->baseUrl('/did')?>" title="DID Manager"><img src="<?=$this->baseUrl('/images/navigation/thumb-did-manager.png')?>" alt="DID Manager" /></a>
 </div>

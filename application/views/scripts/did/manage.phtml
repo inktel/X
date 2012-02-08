@@ -1,0 +1,146 @@
+<script type="text/javascript">
+    $(document).ready(function(){
+        getDids();
+    });
+    
+    /**
+     * Retrieves filter settings from did  and requets dids included in the search 
+     **/
+    function getDids(selectedRoute,searchText){
+        // filters did assigned to  Extension by default
+        if (!selectedRoute) selectedRoute = 'EXTEN';
+        if (!searchText) searchText = '';
+            
+        // retreive all dids based on the filter settings
+        
+         var actionURl = 'http://localhost/X/Did/getDids/' + selectedRoute + '/' + searchText;
+          alert(actionURl);
+        $.ajax({
+            url: actionURl,
+            cache: false,
+            dataType: 'json',
+            success: function(data){
+                alert('test'); 
+                $('#search-result').empty();
+                $('#search-result').tmpl(data).appendTo('#search-result')
+            }
+        });
+    }
+</script>
+<style type="text/css">
+    #view-content{
+        margin-top: 30px;
+        margin-left: 30px;
+    }
+    select{
+        width: 240px;
+        height: 25px;
+        overflow: hidden;
+        font-family: arial;
+        font-size: 10pt;
+    }
+    select option{
+        font-family: arial;
+        font-size: 10pt;
+    }
+    button{
+        width: 25px;
+        height: 25px;
+        overflow: hidden;
+    }
+    button image{
+         width: 20px;
+         height: 20px;
+    }
+    .assignto-area{
+        position: absolute;
+        left:500px;
+        top:199px;
+        width: 380px;
+/*        border: solid 1px black;*/
+    }
+    input{
+        height: 13px;
+        width: 230px;
+        font-family: arial;
+        font-size: 10pt;
+    }
+    #search-result li{
+        list-style-type: none;
+        margin: 5px;
+        
+    }
+    #did-rows{
+        float: left;
+    }
+    
+</style>
+<div id="view-content">
+    <div id="search-area" class="search-area">
+        <table>
+            <thead>
+                <tr>
+                    <td colspan="2" align="left"><h3>Manage dids</h3></td>
+                </tr>
+                <tr>
+                    <td colspan="2">&nbsp;</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td align="left"><label for="search">Search</label></td>
+                    <td align="left">
+                        <input id="search" type="text" placeholder="search"/>
+                        <button type="button" id="btsearch">
+                            <img src="<?=$this->baseUrl('/images/search.png')?>" alt="search" />
+                        </button>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td colspan="2"></td>
+                </tr>
+                <tr>
+                    <td align="left"><label for="filterOptions">Filter options</label></td>
+                    <td align="left"> 
+                        <select size="1" id="filterOptions" name="filterOptions">
+                            <option value="AGENT">Agent</option>
+                            <option value="EXTEN" selected>Extension</option>
+                            <option value="VOICEMAIL">Voice mail</option>
+                            <option value="PHONE">Phone</option>
+                            <option value="IN_GROUP">In group</option>
+                            <option value="CALLMENU">Call menu</option>
+                        </select>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="assignto-area" class="assignto-area">
+        <label for="assignTo">Assign to</label>
+         <select size="1" id="assignTo" name="assignTo">
+            <option value="AGENT">Agent</option>
+            <option value="EXTEN" selected>Extension</option>
+            <option value="VOICEMAIL">Voice mail</option>
+            <option value="PHONE">Phone</option>
+            <option value="IN_GROUP">In group</option>
+            <option value="CALLMENU">Call menu</option>
+        </select>
+    </div>
+    <div id="details-area">
+        <ul id="search-result"></ul>
+        <script id="dids-details" type="text/x-jquery-tmpl">
+            <li id="did-rows" >
+                <div class="didSelected"> <input value="${did_pattern}" type="checkbox"/></div>
+                <div class="didNumber">${did_pattern}</div>
+                <div class="didDescription"> <input name="didDescription" type="text" value="${did_description}"/></div>
+                <div class="didActive"> 
+                    <select>
+                        <option value="Y" >Yes</option>
+                        <option value="N" >No</option>
+                    </select>
+                </div>
+            </li>
+        </script>
+    </div>
+</div>
