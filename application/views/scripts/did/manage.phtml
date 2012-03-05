@@ -138,7 +138,7 @@
         });
         
         
-        $('#search-result input[type=text],select').live('change', function(e){
+        $('#search-result input[type=text],select[name="active"]').live('change', function(e){
             var containerId = $(this).parent().parent().attr('id');
             if (containerId != 'did-add-row')
             {
