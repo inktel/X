@@ -1,33 +1,309 @@
 <script type="text/javascript">
     $(document).ready(function(){
-        getDids();
-    });
+        
+       getDids();
+       
+        
+       
+        $('#btSearch').click(function(){
+            var searchStr = $('#search').val();
+            var selectedRoute = $('#filter-options').val();
+            getDids(selectedRoute,searchStr);
+       
+        });
+        
+        
+        $('#search-area input[name="search"]').live('keyup', function(e) {
+            $('#btSearch').click();
+        });
     
+        $('#search-area select[name="filterOptions"]').live('change', function(e) {
+            $('#btSearch').click();
+        });
+      
+        $('#did-header input[name="didCheckBox"]').live('click',function(e){
+            $('#search-result').find(':checkbox').attr('checked', this.checked);
+        });
+        
+        $('#btAdd').click(function(e){
+              $(this).addClass('hidediv');
+              $('#btDelete').addClass('hidediv');
+             $('#search-result').empty();
+             var addTemplate =  '<li id="did-add-row" >' +
+                    '<input type="hidden" name="didIndex"/>' + 
+                    '<div class="didNumber"> <input  type="text" name="didPattern" placeholder="number" required/></div>' + 
+                    '<div class="didDescription"> <input name="didDescription" type="text" placeholder="description"/></div>' + 
+                    '<div id="didAddCommit" class="didSave">' +  
+                         '<img  src="<?=$this->baseUrl('/images/addsave.png')?>" alt="save" />' + 
+                    '</div>' +
+                    '<div id="didAddCancel" class="didCancel">' +  
+                         '<img  src="<?=$this->baseUrl('/images/cancelsave.png')?>" alt="cancel" />' + 
+                    '</div>' +
+                '</li>';
+            
+            $(addTemplate).appendTo('#search-result');
+            $('#search-result li:first-child').css('border-bottom','none');
+            $('#search-result input[name="didDescription"]').css('margin-left','10px');
+           
+        });
+        
+  
+         $('#btDelete').click(function(e){
+             
+            var isAllChecked = $('.checkAll').is(':checked');
+            var amount  = (isAllChecked) ? $('#search-result input:checked').length - 1 : $('#search-result input:checked').length;
+            var message = "("+  amount + ") number(s) will be permanently deleted and cannot be recovered. Are you sure?";
+            if (amount > 0){
+                $( "#num-items" ).html(message);
+                        
+                        $( "#dialog" ).dialog({
+                        autoOpen: true,
+                        width: 300,
+                        modal: true,
+                        resizable: false,
+                        buttons:[{ text: "Delete all item(s)",
+                                   classes: 'ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only',
+                                   click: function(){
+                                
+                                    var ids =  new Array();
+                                    var key = null;
+
+
+                                    $('#search-result input:checked').each(function(index){
+                                            key = $(this).parent().parent().find('input[name=didIndex]').val();
+                                            if (key) {ids.push(key);}
+                                    });
+
+                                    deleteDids(ids);
+
+                                    $('#search-result input:checked').parent().parent().remove();
+                                    $('#btSearch').click();
+
+                                    if (isAllChecked) {
+                                        $('#did-header').css('border-bottom','none');
+                                    }
+                                    $(this).dialog("close"); 
+                                   }
+                            }
+                          ,{
+                                 text: "Cancel",
+                                 classes: 'ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only',
+                                 click: function(){
+                                $(this).dialog("close");
+                            }
+                          }
+                            
+                        ]});
+                
+               // $('.ui-dialog-buttonpane button:first').css('margin-left','5px');
+            }
+                        
+         });
+        
+        
+        $('#didAddCancel').live('click',function(e){
+           
+            $('#btSearch').click();
+            $('#btAdd').removeClass('hidediv');
+            $('#btDelete').removeClass('hidediv');
+        });
+        
+      
+        
+         $('#search-result input[name="didPattern"]').live('keyup',function(e){
+             var number = $('#search-result input[name="didPattern"]').val();
+             if (number.length < 5 || number.length > 10 || !IsNumeric(number)) {
+                  $('#search-result input[name="didPattern"]').css({'-webkit-box-shadow': '0px 0px 5px red',
+                                                                 '-moz-box-shadow': '0px 0px 5px red',
+                                                                      'box-shadow':' 0px 0px 5px red',
+                                                                     'border-color':'red'});
+             }
+             else{
+                 $('#search-result input[name="didPattern"]').css({'-webkit-box-shadow': '0px 0px 5px #007eff',
+                                                                 '-moz-box-shadow': '0px 0px 5px #007eff',
+                                                                      'box-shadow':'0px 0px 5px #007eff',
+                                                                  'border-color':'#aaa'});
+             }
+         });
+        
+         $('#didAddCommit').live('click',function(e){
+             var number = $('#search-result input[name="didPattern"]').val();
+             var description = $('#search-result input[name="didDescription"]').val();
+             if (number.length >= 5 && number.length <= 10 && IsNumeric(number)) {
+                addDid(number, description);
+                $('#btSearch').click();
+                 $('#btAdd').removeClass('hidediv');
+                 $('#btDelete').removeClass('hidediv');
+             }
+        });
+        
+        
+        $('#search-result input[type=text],select').live('change', function(e){
+            var containerId = $(this).parent().parent().attr('id');
+            if (containerId != 'did-add-row')
+            {
+                var  key  =  $(this).parent().parent().find('input[name=didIndex]').val();
+                var textUpdated = $(this).val();
+                // select the property
+                
+                var propertyName = $(this).attr('name');
+                autoSave(key,propertyName,textUpdated);
+                var checkbox =   $(this).parent().parent().find(':checkbox');
+                checkbox.addClass('checkBoxAutoSaved'); 
+            }
+            
+        });
+  
+    });
+   
+   
+   
+    
+    function autoSave(id, propertyName, val){
+        
+        var url = "<?=$this->baseUrl('/did/autosave')?>";
+
+        // match the property's name with the field.
+         switch(propertyName)
+         {
+             case 'didDescription':
+                   propertyName = 'did_description';
+                 break;
+             case   'active':
+                   propertyName = 'did_active';
+                 break;
+         }
+
+         $.ajax({
+            type: 'POST',
+            url: url,
+            data: {id: id, fieldname: propertyName, value: val},
+            cache: false,
+            success: function(data) {
+               //alert(data);
+               
+            },
+            error: function (request, status, error){
+                alert(error.toString());
+            }
+        });
+    }
+    
+    function deleteDids(ids){
+        
+         var url = "<?=$this->baseUrl('/did/deleteDid')?>";
+       
+         $.ajax({
+            type: 'POST',
+            url: url,
+            data: "ids=" + ids,
+            cache: false,
+            success: function(data) {
+              
+            },
+            error: function (request, status, error){
+                alert(error.toString());
+            }
+        });
+    }
+    
+    function addDid(number, description){
+        
+        number = '/number/' + number;
+        if (!description) description  = '';
+        else description = '/description/' + description;
+        
+         var url = "<?=$this->baseUrl('/did/addDid')?>"  + number  + description;
+        
+         $.ajax({
+            url: url,
+            dataType: 'json',
+            cache: false,
+            success: function(data) {
+               
+            },
+            error: function (request, status, error){
+                alert(error.toString());
+            }
+        });
+    }
+    
+    
+     
     /**
      * Retrieves filter settings from did  and requets dids included in the search 
      **/
     function getDids(selectedRoute,searchText){
         // filters did assigned to  Extension by default
-        if (!selectedRoute) selectedRoute = 'EXTEN';
-        if (!searchText) searchText = '';
-            
-        // retreive all dids based on the filter settings
-        
-         var actionURl = 'http://localhost/X/Did/getDids/' + selectedRoute + '/' + searchText;
-          alert(actionURl);
+        if (!selectedRoute) selectedRoute = '/route/EXTEN';
+          else selectedRoute = '/route/' + selectedRoute
+        if (!searchText) {searchText = '';}
+         else  {searchText = '/filter/' + searchText;}
+ 
+        var url = "<?=$this->baseUrl('/did/getDids')?>"  + selectedRoute  + searchText;
+        //alert(url);
         $.ajax({
-            url: actionURl,
-            cache: false,
+            url: url,
             dataType: 'json',
-            success: function(data){
-                alert('test'); 
+            cache: false,
+            success: function(data) {
+                //alert(data.length);
                 $('#search-result').empty();
-                $('#search-result').tmpl(data).appendTo('#search-result')
+                var resultHeader = '<li id="did-header" >' + 
+                                   '<div class="didSelected"> <input value="All" type="checkbox" name="didCheckBox" class="checkAll"/></div>' + 
+                                   '<div class="didNumber">Number ('+ data.length +')</div>' +
+                                   '<div class="didDescription">Description</div>' + 
+                                   '<div class="didActive">Active</div>' +
+                                   '</li>';
+                $(resultHeader).appendTo('#search-result');
+                $('#dids-details').tmpl(data).appendTo('#search-result');
+                $('#search-result input[value="true"]').parent().find(':checkbox').addClass('checkBoxAutoSaved');
+                $('#search-result select').each(function(index){
+                     $(this).val(data[index].did_active)
+                 });
+            },
+            error: function (request, status, error){
+                alert(error.toString());
             }
         });
+                 
     }
+    
+    function IsNumeric(n)
+    {
+      return !isNaN(parseFloat(n)) && isFinite(n);
+    } 
+    
+    function validateNumber(event) 
+    {
+    
+        var key = window.event ? event.keyCode : event.which;
+
+        if (event.keyCode == 8 || event.keyCode == 46
+        || event.keyCode == 37 || event.keyCode == 39) {
+            return true;
+        }
+        else if ( key < 48 || key > 57 ) {
+            return false;
+        }
+        else return true;
+    };
 </script>
 <style type="text/css">
+    .hidediv{
+        visibility: hidden;
+    }
+    .validateDid{
+       -webkit-box-shadow: 0px 0px 5px red;
+       -moz-box-shadow: 0px 0px 5px red;
+        box-shadow: 0px 0px 5px red;
+    }
+    .checkBoxAutoSaved{
+        -webkit-box-shadow: 0px 0px 5px #006400;
+        -moz-box-shadow: 0px 0px 5px #006400;
+         box-shadow:0px 0px 5px #006400;
+         outline-color: #006400
+    }
     #view-content{
         margin-top: 30px;
         margin-left: 30px;
@@ -65,15 +341,155 @@
         font-family: arial;
         font-size: 10pt;
     }
-    #search-result li{
-        list-style-type: none;
-        margin: 5px;
-        
-    }
-    #did-rows{
+    #details-area{
         float: left;
+        width: 850px;
+        height: 100%;
+        border: 1px solid #ccc;
+        padding: 0px;
     }
     
+    #did-assignto-area{
+         width: 50%;
+        /* border: 1px solid red; */
+         height: 100%;
+         margin: 0px;
+
+    }
+    
+    #did-info-area{
+         width: 50%;
+    /*     border: 1px solid red; */
+         height: 100%;
+         margin: 0px;
+         border-right: 1px solid #ccc;
+         
+    }
+    #search-result li{
+        list-style-type: none;
+        display: inline;
+        margin-bottom: 5px; 
+        float: left;
+        width: 100%;
+        
+    }
+
+    #search-result input[name="didDescription"], 
+    input[name="search"], 
+    input[name="didPattern"]
+    {
+        background: none;
+    }
+    
+    #search-result li:first-child
+    {
+        border-bottom: 1px solid #ccc;
+        color: #000;
+        height: 30px;
+    }
+    
+    #search-result li:nth-child(2)
+    {
+        margin-top: 10px;
+    }
+    
+    #search-result li:first-child > div 
+    {
+       margin-top:  5px;
+    }
+    
+    #search-result li > div
+    {
+        float: left;
+        margin-left: 10px;
+        text-align: left;
+        
+    }
+    
+    #search-result li > div select
+    {
+        width: 60px;
+        
+    }
+    
+    #search-result li > div input
+    {
+        width: 200px;
+        font-family: arial;
+        font-size: 10pt;
+       
+    }
+    
+    #search-result li > div.didCancel{
+/*        border: 1px solid yellow;*/
+    }
+    
+    #search-result li > div.didSelected{
+        width: 10px;
+/*        border: 1px solid yellow;*/
+    }
+    #search-result input[name="didPattern"]{
+         width: 80px;
+/*         margin-left: 20px;*/
+    }
+    
+    #search-result input[name="didDescription"]{
+/*         margin-left: 30px;*/
+    }
+    
+    #search-result li > div.didSave{
+        margin-left: 30px;
+    }
+    
+    #search-result li > div.didNumber{
+        width: 80px;
+  /*      border: 1px solid green;*/
+    }
+    
+    #search-result li > div.didDescription{
+        width: 220px;
+/*        border: 1px solid red;*/
+    }
+    
+    #search-result li > div.didActive{
+        width: 60px;
+/*        border: 1px solid blue;*/
+    }
+    
+    #btSearch{
+        float:right;
+        margin-left: 3px;
+    }
+    #action-area{
+        margin-top: 30px;
+    }
+     #btSave{
+        float:left;
+        width: 35px;
+        height: 30px;
+/*       display: inline;*/
+        margin-left: 2px; 
+/*        border: 1px solid red;*/
+/*        text-align: left;*/
+    }
+    #btDelete{
+        float:left;
+        width: 35px;
+        height: 30px;
+/*       display: inline;*/
+        margin-left: 2px; 
+/*        border: 1px solid red;*/
+/*        text-align: left;*/
+    }
+    #btAdd{
+       float:left;
+       width: 35px;
+       height: 30px;
+/*       border: 1px solid blue; */
+       margin: 0px; 
+       display: inline;
+       text-align: left;
+    }
 </style>
 <div id="view-content">
     <div id="search-area" class="search-area">
@@ -90,10 +506,10 @@
                 <tr>
                     <td align="left"><label for="search">Search</label></td>
                     <td align="left">
-                        <input id="search" type="text" placeholder="search"/>
-                        <button type="button" id="btsearch">
-                            <img src="<?=$this->baseUrl('/images/search.png')?>" alt="search" />
-                        </button>
+                        <input id="search" type="text" placeholder="search" name="search"/>
+                        <div id="btSearch">
+                            <img  src="<?=$this->baseUrl('/images/search.png')?>" alt="search" />
+                        </div>
                     </td>
                 </tr>
                 
@@ -103,7 +519,7 @@
                 <tr>
                     <td align="left"><label for="filterOptions">Filter options</label></td>
                     <td align="left"> 
-                        <select size="1" id="filterOptions" name="filterOptions">
+                        <select size="1" id="filter-options" name="filterOptions">
                             <option value="AGENT">Agent</option>
                             <option value="EXTEN" selected>Extension</option>
                             <option value="VOICEMAIL">Voice mail</option>
@@ -127,20 +543,52 @@
             <option value="CALLMENU">Call menu</option>
         </select>
     </div>
+    <div id="action-area">
+        <div id="btAdd">       
+              <img  src="<?=$this->baseUrl('/images/add.png')?>" alt="add" />
+        </div>
+        <div id="btDelete">
+              <img  src="<?=$this->baseUrl('/images/delete.png')?>" alt="delete" />
+        </div>
+        
+    </div>
     <div id="details-area">
-        <ul id="search-result"></ul>
-        <script id="dids-details" type="text/x-jquery-tmpl">
-            <li id="did-rows" >
-                <div class="didSelected"> <input value="${did_pattern}" type="checkbox"/></div>
-                <div class="didNumber">${did_pattern}</div>
-                <div class="didDescription"> <input name="didDescription" type="text" value="${did_description}"/></div>
-                <div class="didActive"> 
-                    <select>
-                        <option value="Y" >Yes</option>
-                        <option value="N" >No</option>
-                    </select>
-                </div>
-            </li>
-        </script>
+        <div id="did-info-area">
+            <ul id="search-result"></ul>
+            <script id="dids-details" type="text/x-jquery-tmpl">
+                <li id="did-rows" class="didrows">
+                    <input value="${key}" type="hidden" name="didIndex"/>
+                    <input value="${autoSaved}" type="hidden" name="autoSaved"/>
+                    <div class="didSelected"> <input value="${did_pattern}" type="checkbox" name="didCheckBox" /></div>
+                    <div class="didNumber">${did_pattern}</div>
+                    <div class="didDescription"> <input name="didDescription" type="text" value="${did_description}"/></div>
+                    <div class="didActive"> 
+                         <select name="active" value="${did_active}">
+                            <option value="Y" >Yes</option>
+                            <option value="N" >No</option>
+                        </select>
+                    </div>
+                </li>
+            </script>
+            <script id="did-add" type="text/x-jquery-tmpl">
+               
+            </script>
+            <div style="clear:both;"></div>   
+        </div>
+        <div id="did-assignto-area">
+         
+        </div>
+
     </div>
 </div>
+
+
+
+
+<div id="dialog" title="Attention" style="display: none; ">
+    <p>
+       <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 0 0;"></span> 
+       <span id="num-items"></span>
+    </p>
+</div>
+

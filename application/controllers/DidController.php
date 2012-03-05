@@ -1,5 +1,7 @@
 <?php
 
+use X\Engine;
+
 class DidController extends Zend_Controller_Action
 {
 
@@ -12,9 +14,7 @@ class DidController extends Zend_Controller_Action
 
     public function indexAction()
     {
-        // action body
-//        $did = Did::find_by_active('Y');
-//        var_dump ($did);
+
     }           
 
     public function GetDelimiter($file)
@@ -229,61 +229,111 @@ class DidController extends Zend_Controller_Action
         }
        
         $didObjs = array();
-        //Remove the undesirable columns
+        
+        //build did entities
         $countRows = count($fileContent[$numberCol]);
         for ($i = 1; $i < $countRows; $i++)
         {
-            $did = new Did();
-            $did->did_pattern = $fileContent[$numberCol][$i];
-            $did->did_description = $fileContent[$descriptionCol][$i];
-            $did->did_active = "Y";
-            $did->did_route = "EXTEN";
-            $did->extension = "9998811112";
-            $did->exten_context = "default";
-            $did->user_unavailable_action = "VOICEMAIL";
-            $did->user_route_settings_ingroup = "AGENTDIRECT";
-            $did->call_handle_method = "CID";
-            $did->agent_search_method = "LB";
-            $did->list_id = 999;
-            $did->phone_code = "1";
-            $did->record_call = "N";
-            $did->filter_inbound_number = "DISABLE";
-            $did->filter_action = "EXTEN";
-            $did->filter_extension = "9998811112";
-            $did->filter_exten_context = "default";
-            $did->filter_user_unavailable_action = "VOICEMAIL";
-            $did->filter_user_route_settings_ingroup = "AGENTDIRECT";
-            $did->filter_call_handle_method = "CID";
-            $did->filter_agent_search_method = "LB";
-            $did->filter_list_id = 999;
-            $did->filter_phone_code = "1";
-            
-            //Commit each record
-            //$did->save(TRUE);
+            $did = new Did(array('did_pattern' => $fileContent[$numberCol][$i], 
+                                 'did_description'=> $fileContent[$descriptionCol][$i]));
             $didObjs[] = $did;     
         }
         $_SESSION['FileManager']['Dids'] = $didObjs;
     }
     
-    
-    public function getDidsAction($route,$filter)
+    /*
+     * @assert("EXTEN","spot") == 1
+     * @assert("AGENT") == 0
+     * @assert() == 82
+     * @assert("EXTEN") == 1
+     */
+    public function getdidsAction()
     {
         $dids =  $_SESSION['FileManager']['Dids'];
-        $count = count($dids);
-        if(!$filter) $filter = "";
+
         $result = array();
-        for ($i=0; $i < $count; $i++)
-        {
-            $patternPos = strpos($dids[$i]->did_pattern,$filter);
-            $descriptionPos = strpos($dids[$i]->did_description, $filter);
-            if (($dids[$i]->did_route == $route) 
-               && (($filter == "") || ($patternPos !== false) || ($descriptionPos !== false)))
-            {
-                $result[$i] = $dids[$i];
+       
+        $request = $this->getRequest();
+        $route = $request->getParam('route');
+        $filter = $request->getParam('filter');
+        
+        if (!isset($route)) $route = 'EXTEN';
+        if (!isset($filter)) $filter = '';
+        
+        $tempResult = array_filter($dids, function ($item) use ($filter,$route) {
+            if (($item->did_route == $route) &&
+                (($filter == "") || stripos($item->did_pattern, $filter) !== false || stripos($item->did_description, $filter) !== false)) {
+                return true;
             }
+            return false;
+        });
+        
+        foreach ($tempResult as $key => $value)
+        {
+              $result[] = array('key' => $key,
+                                'autoSaved' => $value->autoSaved,
+                                'did_pattern' => $value->did_pattern, 
+                                'did_description' => $value->did_description, 
+                                'did_active' => $value->did_active);
+            
         }
-          
-        return json_encode($result);      
+        
+       $this->_helper->json($result);
+       
+    }
+    
+    public function adddidAction()
+    {
+        $request = $this->getRequest();
+        $number = $request->getParam('number');
+        $description = $request->getParam('description');
+        if (!isset($description)) $description = '';
+        $dids =  $_SESSION['FileManager']['Dids'];
+        
+        // todo Check if the number already exist if so add it if it is not send failure.
+        // todo add number to the DB
+    
+        // add number to memory
+        $dids[] = new Did(array('did_pattern' => $number, 
+                                 'did_description'=> $description));
+        $_SESSION['FileManager']['Dids'] = $dids;
+        
+        $result =  array("result" => "success");
+        $this->_helper->json($result);
+    }
+    
+    public function deletedidAction()
+    {
+        $request = $this->getRequest();
+        $ids = $request->getParam('ids');
+        $idList = explode(',',$ids);
+        $dids =  $_SESSION['FileManager']['Dids'];
+        foreach ($idList as $value)
+        {
+            unset($dids[$value]);
+        }
+        $result = array();
+        $result =  array("result" => "success");
+        $_SESSION['FileManager']['Dids'] = $dids;
+        
+        $this->_helper->json($result);
+    }
+    
+    public function autosaveAction()
+    {
+        $request = $this->getRequest();
+        $id = $request->getParam('id');
+        $fieldName = $request->getParam('fieldname');
+        $value = $request->getParam('value');
+       
+        $dids =  $_SESSION['FileManager']['Dids'];
+        
+        $dids[$id]->$fieldName = $value;
+        $dids[$id]->autoSaved = true;
+        
+        $_SESSION['FileManager']['Dids'] = $dids;
+        
+        $this->_helper->json($dids[$id]->autoSaved);
     }
 
 }

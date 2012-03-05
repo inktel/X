@@ -18,8 +18,8 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             //jquery lib includes here (default loads from google CDN)
             $view->jQuery()->enable()//enable jquery ; ->setCdnSsl(true) if need to load from ssl location
                 ->setVersion('1.5')//jQuery version, automatically 1.5 = 1.5.latest
-                ->setUiVersion('1.8')//jQuery UI version, automatically 1.8 = 1.8.latest
-                ->addStylesheet('https://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/ui-lightness/jquery-ui.css')//add the css
+                ->setUiVersion('1.8.17')//jQuery UI version, automatically 1.8 = 1.8.latest
+                ->addStylesheet('http://jquery-ui.googlecode.com/svn/tags/1.8.17/themes/ui-lightness/jquery-ui.css')//add the css
                 ->uiEnable();//enable ui
 	 
 	}
@@ -52,5 +52,9 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             $this->bootstrap('session');
             Zend_Session::start();
         }
+        
+//        protected function _initFileManager(){
+//            include_once 'FileManaget.php';
+//        }
 }
 
